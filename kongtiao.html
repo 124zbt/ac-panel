@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>立式空调控制面板</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+        }
+
+        .ac-panel {
+            width: 380px;
+            background: linear-gradient(180deg, #1e3a5f 0%, #0d2137 100%);
+            border-radius: 25px;
+            padding: 30px 25px;
+            box-shadow: 
+                0 0 0 2px rgba(255,255,255,0.05),
+                0 20px 60px rgba(0,0,0,0.5),
+                inset 0 1px 0 rgba(255,255,255,0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .ac-panel::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 100%;
+            background: repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 2px,
+                rgba(255,255,255,0.01) 2px,
+                rgba(255,255,255,0.01) 4px
+            );
+            pointer-events: none;
+        }
+
+        /* 品牌标题 */
+        .brand {
+            text-align: center;
+            color: #4fc3f7;
+            font-size: 14px;
+            letter-spacing: 6px;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+            opacity: 0.8;
+        }
+
+        /* 显示屏区域 */
+        .display-area {
+            background: linear-gradient(180deg, #0a1628 0%, #0d1f3c 100%);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 25px;
+            box-shadow: 
+                inset 0 2px 10px rgba(0,0,0,0.5),
+                0 1px 0 rgba(255,255,255,0.05);
+            border: 1px solid rgba(79, 195, 247, 0.1);
+        }
+
+        .mode-indicator {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 15px;
+        }
+
+        .mode-icon {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            background: rgba(255,255,255,0.05);
+            color: rgba(255,255,255,0.3);
+            transition: all 0.3s;
+        }
+
+        .mode-icon.active {
+            background: rgba(79, 195, 247, 0.2);
+            color: #4fc3f7;
+            box-shadow: 0 0 15px rgba(79, 195, 247, 0.3);
+        }
+
+        .temp-display {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .current-temp {
+            font-size: 72px;
+            font-weight: 200;
+            color: #4fc3f7;
+            line-height: 1;
+            text-shadow: 0 0 20px rgba(79, 195, 247, 0.5);
+            transition: color 0.3s;
+        }
+
+        .current-temp.heating {
+            color: #ff7043;
+            text-shadow: 0 0 20px rgba(255, 112, 67, 0.5);
+        }
+
+        .current-temp.cooling {
+            color: #4fc3f7;
+            text-shadow: 0 0 20px rgba(79, 195, 247, 0.5);
+        }
+
+        .current-temp.fan {
+            color: #81c784;
+            text-shadow: 0 0 20px rgba(129, 199, 132, 0.5);
+        }
+
+        .temp-unit {
+            font-size: 24px;
+            color: rgba(255,255,255,0.5);
+            vertical-align: super;
+        }
+
+        .mode-text {
+            text-align: center;
+            color: rgba(255,255,255,0.6);
+            font-size: 13px;
+            letter-spacing: 3px;
+            margin-top: 5px;
+        }
+
+        /* 温湿度信息 */
+        .env-info {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid rgba(255,255,255,0.08);
+        }
+
+        .env-item {
+            text-align: center;
+        }
+
+        .env-label {
+            font-size: 11px;
+            color: rgba(255,255,255,0.4);
+            margin-bottom: 3px;
+        }
+
+        .env-value {
+            font-size: 18px;
+            color: rgba(255,255,255,0.8);
+            font-weight: 300;
+        }
+
+        .env-value .env-unit {
+            font-size: 12px;
+            color: rgba(255,255,255,0.4);
+        }
+
+        /* 温度调节区域 */
+        .temp-control {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+
+        .temp-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: 2px solid rgba(79, 195, 247, 0.3);
+            background: rgba(79, 195, 247, 0.05);
+            color: #4fc3f7;
+            font-size: 24px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            user-select: none;
+        }
+
+        .temp-btn:hover {
+            background: rgba(79, 195, 247, 0.15);
+            border-color: rgba(79, 195, 247, 0.6);
+            transform: scale(1.05);
+        }
+
+        .temp-btn:active {
+            transform: scale(0.95);
+            background: rgba(79, 195, 247, 0.25);
+        }
+
+        .set-temp-display {
+            text-align: center;
+        }
+
+        .set-temp-label {
+            font-size: 11px;
+            color: rgba(255,255,255,0.4);
+            margin-bottom: 2px;
+        }
+
+        .set-temp-value {
+            font-size: 32px;
+            color: #fff;
+            font-weight: 300;
+        }
+
+        /* 扫风控制区域 */
+        .section-title {
+            font-size: 12px;
+            color: rgba(255,255,255,0.4);
+            letter-spacing: 2px;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+        }
+
+        .swing-controls {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 25px;
+        }
+
+        .swing-btn {
+            flex: 1;
+            padding: 14px 10px;
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(255,255,255,0.03);
+            color: rgba(255,255,255,0.6);
+            font-size: 13px;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.3s;
+        }
+
+        .swing-btn .icon {
+            font-size: 22px;
+        }
+
+        .swing-btn.active {
+            background: rgba(79, 195, 247, 0.15);
+            border-color: rgba(79, 195, 247, 0.4);
+            color: #4fc3f7;
+            box-shadow: 0 0 20px rgba(79, 195, 247, 0.15);
+        }
+
+        .swing-btn:hover:not(.active) {
+            background: rgba(255,255,255,0.06);
+            border-color: rgba(255,255,255,0.2);
+        }
+
+        /* 模式选择区域 */
+        .mode-controls {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+
+        .mode-btn {
+            padding: 14px 8px;
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(255,255,255,0.03);
+            color: rgba(255,255,255,0.6);
+            font-size: 12px;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.3s;
+        }
+
+        .mode-btn .icon {
+            font-size: 20px;
+        }
+
+        .mode-btn.active {
+            background: rgba(79, 195, 247, 0.15);
+            border-color: rgba(79, 195, 247, 0.4);
+            color: #4fc3f7;
+            box-shadow: 0 0 20px rgba(79, 195, 247, 0.15);
+        }
+
+        .mode-btn:hover:not(.active) {
+            background: rgba(255,255,255,0.06);
+            border-color: rgba(255,255,255,0.2);
+        }
+
+        /* 特殊模式按钮 */
+        .special-modes {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+
+        .special-btn {
+            padding: 14px 8px;
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(255,255,255,0.03);
+            color: rgba(255,255,255,0.6);
+            font-size: 12px;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.3s;
+        }
+
+        .special-btn .icon {
+            font-size: 20px;
+        }
+
+        .special-btn.turbo.active {
+            background: rgba(255, 112, 67, 0.2);
+            border-color: rgba(255, 112, 67, 0.5);
+            color: #ff7043;
+            box-shadow: 0 0 20px rgba(255, 112, 67, 0.2);
+        }
+
+        .special-btn.quiet.active {
+            background: rgba(129, 199, 132, 0.15);
+            border-color: rgba(129, 199, 132, 0.4);
+            color: #81c784;
+            box-shadow: 0 0 20px rgba(129, 199, 132, 0.15);
+        }
+
+        .special-btn.sleep.active {
+            background: rgba(171, 71, 188, 0.15);
+            border-color: rgba(171, 71, 188, 0.4);
+            color: #ab47bc;
+            box-shadow: 0 0 20px rgba(171, 71, 188, 0.15);
+        }
+
+        .special-btn:hover:not(.active) {
+            background: rgba(255,255,255,0.06);
+            border-color: rgba(255,255,255,0.2);
+        }
+
+        /* 风速控制 */
+        .fan-speed-control {
+            margin-bottom: 25px;
+        }
+
+        .fan-speed-options {
+            display: flex;
+            gap: 8px;
+        }
+
+        .fan-speed-btn {
+            flex: 1;
+            padding: 10px;
+            border-radius: 10px;
+            border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(255,255,255,0.03);
+            color: rgba(255,255,255,0.5);
+            font-size: 12px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .fan-speed-btn.active {
+            background: rgba(79, 195, 247, 0.15);
+            border-color: rgba(79, 195, 247, 0.4);
+            color: #4fc3f7;
+        }
+
+        .fan-speed-btn:hover:not(.active) {
+            background: rgba(255,255,255,0.06);
+        }
+
+        /* 电源按钮 */
+        .power-section {
+            display: flex;
+            justify-content: center;
+            margin-top: 5px;
+        }
+
+        .power-btn {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: 2px solid rgba(255, 82, 82, 0.4);
+            background: rgba(255, 82, 82, 0.08);
+            color: rgba(255, 82, 82, 0.7);
+            font-size: 26px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+
+        .power-btn:hover {
+            background: rgba(255, 82, 82, 0.15);
+            border-color: rgba(255, 82, 82, 0.7);
+            transform: scale(1.05);
+        }
+
+        .power-btn.on {
+            background: rgba(255, 82, 82, 0.2);
+            color: #ff5252;
+            box-shadow: 0 0 25px rgba(255, 82, 82, 0.3);
+        }
+
+        /* 定时显示 */
+        .timer-display {
+            text-align: center;
+            margin-top: 15px;
+            font-size: 12px;
+            color: rgba(255,255,255,0.3);
+        }
+
+        /* 状态指示灯 */
+        .status-dots {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.1);
+            transition: all 0.3s;
+        }
+
+        .status-dot.active {
+            background: #4fc3f7;
+            box-shadow: 0 0 8px rgba(79, 195, 247, 0.5);
+        }
+
+        /* 温度条 */
+        .temp-bar {
+            width: 100%;
+            height: 4px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 2px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+
+        .temp-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4fc3f7, #ff7043);
+            border-radius: 2px;
+            transition: width 0.3s;
+            width: 50%;
+        }
+
+        /* 动画 */
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        @keyframes swingAnim {
+            0%, 100% { transform: rotate(-15deg); }
+            50% { transform: rotate(15deg); }
+        }
+
+        .swinging .icon {
+            animation: swingAnim 1s ease-in-out infinite;
+        }
+
+        /* 关机状态 */
+        .ac-panel.powered-off .display-area {
+            opacity: 0.3;
+        }
+
+        .ac-panel.powered-off .temp-control,
+        .ac-panel.powered-off .swing-controls,
+        .ac-panel.powered-off .mode-controls,
+        .ac-panel.powered-off .special-modes,
+        .ac-panel.powered-off .fan-speed-control {
+            opacity: 0.3;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="ac-panel" id="acPanel">
+        <div class="brand">CLIMATE CONTROL</div>
+
+        <!-- 显示屏区域 -->
+        <div class="display-area">
+            <div class="mode-indicator">
+                <div class="mode-icon active" id="indCooling" title="制冷">❄️</div>
+                <div class="mode-icon" id="indHeating" title="制热">🔥</div>
+                <div class="mode-icon" id="indFan" title="送风">💨</div>
+                <div class="mode-icon" id="indDry" title="除湿">💧</div>
+                <div class="mode-icon" id="indAuto" title="自动">🤖</div>
+            </div>
+
+            <div class="temp-display">
+                <span class="current-temp cooling" id="currentTemp">24</span>
+                <span class="temp-unit">°C</span>
+            </div>
+            <div class="mode-text" id="modeText">制冷模式</div>
+
+            <div class="temp-bar">
+                <div class="temp-bar-fill" id="tempBarFill"></div>
+            </div>
+
+            <div class="env-info">
+                <div class="env-item">
+                    <div class="env-label">室内温度</div>
+                    <div class="env-value" id="indoorTemp">26.5<span class="env-unit">°C</span></div>
+                </div>
+                <div class="env-item">
+                    <div class="env-label">室外温度</div>
+                    <div class="env-value" id="outdoorTemp">32.0<span class="env-unit">°C</span></div>
+                </div>
+                <div class="env-item">
+                    <div class="env-label">室内湿度</div>
+                    <div class="env-value" id="indoorHumidity">55<span class="env-unit">%</span></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 温度调节 -->
+        <div class="section-title">温度调节</div>
+        <div class="temp-control">
+            <button class="temp-btn" id="tempDown" onclick="adjustTemp(-1)">−</button>
+            <div class="set-temp-display">
+                <div class="set-temp-label">设定温度</div>
+                <div class="set-temp-value" id="setTemp">24°C</div>
+            </div>
+            <button class="temp-btn" id="tempUp" onclick="adjustTemp(1)">+</button>
+        </div>
+
+        <!-- 扫风控制 -->
+        <div class="section-title">扫风控制</div>
+        <div class="swing-controls">
+            <button class="swing-btn" id="swingUpDown" onclick="toggleSwing('updown')">
+                <span class="icon">↕️</span>
+                <span>上下扫风</span>
+            </button>
+            <button class="swing-btn" id="swingLeftRight" onclick="toggleSwing('leftright')">
+                <span class="icon">↔️</span>
+                <span>左右扫风</span>
+            </button>
+            <button class="swing-btn" id="swingBoth" onclick="toggleSwing('both')">
+                <span class="icon">🔄</span>
+                <span>全方位</span>
+            </button>
+        </div>
+
+        <!-- 模式选择 -->
+        <div class="section-title">运行模式</div>
+        <div class="mode-controls">
+            <button class="mode-btn active" id="btnCooling" onclick="setMode('cooling')">
+                <span class="icon">❄️</span>
+                <span>制冷</span>
+            </button>
+            <button class="mode-btn" id="btnHeating" onclick="setMode('heating')">
+                <span class="icon">🔥</span>
+                <span>制热</span>
+            </button>
+            <button class="mode-btn" id="btnFan" onclick="setMode('fan')">
+                <span class="icon">💨</span>
+                <span>送风</span>
+            </button>
+            <button class="mode-btn" id="btnDry" onclick="setMode('dry')">
+                <span class="icon">💧</span>
+                <span>除湿</span>
+            </button>
+            <button class="mode-btn" id="btnAuto" onclick="setMode('auto')">
+                <span class="icon">🤖</span>
+                <span>自动</span>
+            </button>
+            <button class="mode-btn" id="btnVent" onclick="setMode('vent')">
+                <span class="icon">🌬️</span>
+                <span>换气</span>
+            </button>
+        </div>
+
+        <!-- 特殊功能 -->
+        <div class="section-title">特殊功能</div>
+        <div class="special-modes">
+            <button class="special-btn turbo" id="btnTurbo" onclick="toggleTurbo()">
+                <span class="icon">⚡</span>
+                <span>超强模式</span>
+            </button>
+            <button class="special-btn quiet" id="btnQuiet" onclick="toggleQuiet()">
+                <span class="icon">🔇</span>
+                <span>静音模式</span>
+            </button>
+            <button class="special-btn sleep" id="btnSleep" onclick="toggleSleep()">
+                <span class="icon">🌙</span>
+                <span>睡眠模式</span>
+            </button>
+        </div>
+
+        <!-- 风速控制 -->
+        <div class="section-title">风速调节</div>
+        <div class="fan-speed-control">
+            <div class="fan-speed-options">
+                <button class="fan-speed-btn" onclick="setFanSpeed('low')">微风</button>
+                <button class="fan-speed-btn active" onclick="setFanSpeed('medium')">中风</button>
+                <button class="fan-speed-btn" onclick="setFanSpeed('high')">强风</button>
+                <button class="fan-speed-btn" onclick="setFanSpeed('auto')">自动</button>
+            </div>
+        </div>
+
+        <!-- 电源 -->
+        <div class="power-section">
+            <button class="power-btn" id="powerBtn" onclick="togglePower()">⏻</button>
+        </div>
+
+        <div class="timer-display" id="timerDisplay"></div>
+
+        <div class="status-dots">
+            <div class="status-dot active" id="dotPower"></div>
+            <div class="status-dot" id="dotRun"></div>
+            <div class="status-dot" id="dotSignal"></div>
+        </div>
+    </div>
+
+    <script>
+        // 状态管理
+        const state = {
+            power: true,
+            temp: 24,
+            mode: 'cooling',
+            fanSpeed: 'medium',
+            swing: 'none', // none, updown, leftright, both
+            turbo: false,
+            quiet: false,
+            sleep: false,
+            indoorTemp: 26.5,
+            outdoorTemp: 32.0,
+            humidity: 55
+        };
+
+        const modeNames = {
+            cooling: '制冷模式',
+            heating: '制热模式',
+            fan: '送风模式',
+            dry: '除湿模式',
+            auto: '自动模式',
+            vent: '换气模式'
+        };
+
+        const modeIcons = {
+            cooling: '❄️',
+            heating: '🔥',
+            fan: '💨',
+            dry: '💧',
+            auto: '🤖',
+            vent: '🌬️'
+        };
+
+        function togglePower() {
+            state.power = !state.power;
+            const panel = document.getElementById('acPanel');
+            const powerBtn = document.getElementById('powerBtn');
+            const dotPower = document.getElementById('dotPower');
+
+            if (state.power) {
+                panel.classList.remove('powered-off');
+                powerBtn.classList.add('on');
+                dotPower.classList.add('active');
+                updateDisplay();
+            } else {
+                panel.classList.add('powered-off');
+                powerBtn.classList.remove('on');
+                dotPower.classList.remove('active');
+                document.getElementById('currentTemp').textContent = '—';
+                document.getElementById('modeText').textContent = '已关机';
+                document.getElementById('setTemp').textContent = '—';
+                // 清除所有active状态
+                document.querySelectorAll('.mode-icon').forEach(i => i.classList.remove('active'));
+                document.getElementById('dotRun').classList.remove('active');
+            }
+        }
+
+        function adjustTemp(delta) {
+            if (!state.power) return;
+            state.temp = Math.max(16, Math.min(30, state.temp + delta));
+            updateDisplay();
+        }
+
+        function setMode(mode) {
+            if (!state.power) return;
+            state.mode = mode;
+
+            // 更新模式按钮
+            document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById('btn' + mode.charAt(0).toUpperCase() + mode.slice(1)).classList.add('active');
+
+            // 更新指示器
+            document.querySelectorAll('.mode-icon').forEach(i => i.classList.remove('active'));
+            const indMap = {
+                cooling: 'indCooling', heating: 'indHeating', fan: 'indFan',
+                dry: 'indDry', auto: 'indAuto'
+            };
+            if (indMap[mode]) {
+                document.getElementById(indMap[mode]).classList.add('active');
+            }
+
+            // 更新温度显示颜色
+            const tempEl = document.getElementById('currentTemp');
+            tempEl.className = 'current-temp ' + mode;
+
+            updateDisplay();
+        }
+
+        function toggleSwing(type) {
+            if (!state.power) return;
+
+            if (type === 'both') {
+                if (state.swing === 'both') {
+                    state.swing = 'none';
+                } else {
+                    state.swing = 'both';
+                }
+            } else if (type === 'updown') {
+                if (state.swing === 'updown') {
+                    state.swing = 'none';
+                } else if (state.swing === 'leftright') {
+                    state.swing = 'both';
+                } else if (state.swing === 'both') {
+                    state.swing = 'leftright';
+                } else {
+                    state.swing = 'updown';
+                }
+            } else if (type === 'leftright') {
+                if (state.swing === 'leftright') {
+                    state.swing = 'none';
+                } else if (state.swing === 'updown') {
+                    state.swing = 'both';
+                } else if (state.swing === 'both') {
+                    state.swing = 'updown';
+                } else {
+                    state.swing = 'leftright';
+                }
+            }
+
+            // 更新按钮状态
+            const btnUD = document.getElementById('swingUpDown');
+            const btnLR = document.getElementById('swingLeftRight');
+            const btnBoth = document.getElementById('swingBoth');
+
+            btnUD.classList.remove('active');
+            btnLR.classList.remove('active');
+            btnBoth.classList.remove('active', 'swinging');
+
+            if (state.swing === 'updown') {
+                btnUD.classList.add('active', 'swinging');
+            } else if (state.swing === 'leftright') {
+                btnLR.classList.add('active', 'swinging');
+            } else if (state.swing === 'both') {
+                btnBoth.classList.add('active', 'swinging');
+                btnUD.classList.add('active');
+                btnLR.classList.add('active');
+            }
+        }
+
+        function toggleTurbo() {
+            if (!state.power) return;
+            state.turbo = !state.turbo;
+            document.getElementById('btnTurbo').classList.toggle('active', state.turbo);
+            if (state.turbo) {
+                state.quiet = false;
+                document.getElementById('btnQuiet').classList.remove('active');
+                setFanSpeed('high');
+            }
+        }
+
+        function toggleQuiet() {
+            if (!state.power) return;
+            state.quiet = !state.quiet;
+            document.getElementById('btnQuiet').classList.toggle('active', state.quiet);
+            if (state.quiet) {
+                state.turbo = false;
+                document.getElementById('btnTurbo').classList.remove('active');
+                setFanSpeed('low');
+            }
+        }
+
+        function toggleSleep() {
+            if (!state.power) return;
+            state.sleep = !state.sleep;
+            document.getElementById('btnSleep').classList.toggle('active', state.sleep);
+            if (state.sleep) {
+                document.getElementById('modeText').textContent = '睡眠模式';
+            } else {
+                updateDisplay();
+            }
+        }
+
+        function setFanSpeed(speed) {
+            if (!state.power) return;
+            state.fanSpeed = speed;
+            document.querySelectorAll('.fan-speed-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+
+        function updateDisplay() {
+            if (!state.power) return;
+
+            document.getElementById('currentTemp').textContent = state.temp;
+            document.getElementById('setTemp').textContent = state.temp + '°C';
+            document.getElementById('modeText').textContent = state.sleep ? '睡眠模式' : modeNames[state.mode];
+
+            // 更新温度条
+            const fillPercent = ((state.temp - 16) / (30 - 16)) * 100;
+            document.getElementById('tempBarFill').style.width = fillPercent + '%';
+
+            // 运行状态灯
+            document.getElementById('dotRun').classList.toggle('active', state.power);
+        }
+
+        // 模拟室内外温度变化
+        setInterval(() => {
+            if (!state.power) return;
+
+            // 模拟室内温度缓慢趋近设定温度
+            const diff = state.temp - state.indoorTemp;
+            state.indoorTemp += diff * 0.02 + (Math.random() - 0.5) * 0.1;
+            state.indoorTemp = Math.round(state.indoorTemp * 10) / 10;
+
+            // 模拟室外温度小幅波动
+            state.outdoorTemp += (Math.random() - 0.5) * 0.2;
+            state.outdoorTemp = Math.round(state.outdoorTemp * 10) / 10;
+
+            // 模拟湿度变化
+            state.humidity += Math.round((Math.random() - 0.5) * 2);
+            state.humidity = Math.max(30, Math.min(80, state.humidity));
+
+            document.getElementById('indoorTemp').innerHTML = state.indoorTemp + '<span class="env-unit">°C</span>';
+            document.getElementById('outdoorTemp').innerHTML = state.outdoorTemp + '<span class="env-unit">°C</span>';
+            document.getElementById('indoorHumidity').innerHTML = state.humidity + '<span class="env-unit">%</span>';
+        }, 3000);
+
+        // 信号指示灯闪烁
+        setInterval(() => {
+            const dotSignal = document.getElementById('dotSignal');
+            dotSignal.classList.toggle('active');
+        }, 2000);
+
+        // 初始化
+        updateDisplay();
+    </script>
+</body>
+</html>
