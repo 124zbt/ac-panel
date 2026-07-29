@@ -2,10 +2,467 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="refresh" content="0; url=kongtiao.html">
-  <title>Loading...</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>我的作品集 | Portfolio</title>
+  <style>
+    /* ===== 全局重置 ===== */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --primary: #6366f1;
+      --primary-dark: #4f46e5;
+      --accent: #06b6d4;
+      --bg: #0f172a;
+      --bg-card: #1e293b;
+      --bg-card-hover: #334155;
+      --text: #f1f5f9;
+      --text-muted: #94a3b8;
+      --border: rgba(255,255,255,0.08);
+      --shadow: 0 10px 40px rgba(0,0,0,0.3);
+      --radius: 16px;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ===== 背景动画 ===== */
+    .bg-glow {
+      position: fixed;
+      top: -200px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 800px;
+      height: 800px;
+      background: radial-gradient(circle, rgba(99,102,241,0.15) 0%, transparent 70%);
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    /* ===== 导航栏 ===== */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      backdrop-filter: blur(16px);
+      background: rgba(15,23,42,0.8);
+      border-bottom: 1px solid var(--border);
+      padding: 14px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    nav .logo {
+      font-size: 18px;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: -0.5px;
+    }
+
+    nav .nav-links a {
+      color: var(--text-muted);
+      text-decoration: none;
+      margin-left: 28px;
+      font-size: 14px;
+      transition: color 0.2s;
+    }
+
+    nav .nav-links a:hover { color: var(--text); }
+
+    /* ===== Hero 区域 ===== */
+    .hero {
+      padding: 140px 24px 60px;
+      text-align: center;
+      max-width: 720px;
+      margin: 0 auto;
+    }
+
+    .hero .avatar {
+      width: 96px;
+      height: 96px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 36px;
+      font-weight: 700;
+      margin: 0 auto 24px;
+      box-shadow: 0 0 0 4px rgba(99,102,241,0.2), 0 0 30px rgba(99,102,241,0.3);
+    }
+
+    .hero h1 {
+      font-size: 42px;
+      font-weight: 800;
+      letter-spacing: -1px;
+      margin-bottom: 12px;
+      line-height: 1.2;
+    }
+
+    .hero h1 .highlight {
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero p {
+      font-size: 18px;
+      color: var(--text-muted);
+      margin-bottom: 32px;
+    }
+
+    .hero .social-links {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .hero .social-links a {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 20px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 14px;
+      transition: all 0.25s;
+      background: rgba(255,255,255,0.03);
+    }
+
+    .hero .social-links a:hover {
+      border-color: var(--primary);
+      color: var(--text);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 20px rgba(99,102,241,0.25);
+    }
+
+    /* ===== 技能标签 ===== */
+    .skills-section {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 20px 24px;
+      text-align: center;
+    }
+
+    .skills-section h3 {
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+    }
+
+    .skill-tags {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .skill-tags span {
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-size: 13px;
+      background: rgba(99,102,241,0.1);
+      border: 1px solid rgba(99,102,241,0.25);
+      color: #a5b4fc;
+      transition: all 0.2s;
+    }
+
+    .skill-tags span:hover {
+      background: rgba(99,102,241,0.2);
+      transform: scale(1.05);
+    }
+
+    /* ===== 项目区域 ===== */
+    .projects-section {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 60px 24px;
+    }
+
+    .projects-section .section-header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .projects-section .section-header h2 {
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .projects-section .section-header p {
+      color: var(--text-muted);
+      font-size: 15px;
+    }
+
+    .projects-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 24px;
+    }
+
+    .project-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .project-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--primary), var(--accent));
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .project-card:hover {
+      background: var(--bg-card-hover);
+      transform: translateY(-4px);
+      box-shadow: var(--shadow);
+      border-color: rgba(99,102,241,0.3);
+    }
+
+    .project-card:hover::before { opacity: 1; }
+
+    .project-card .card-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      margin-bottom: 20px;
+      background: rgba(99,102,241,0.15);
+    }
+
+    .project-card h3 {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .project-card p {
+      font-size: 14px;
+      color: var(--text-muted);
+      margin-bottom: 20px;
+      min-height: 42px;
+    }
+
+    .project-card .tech-stack {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 20px;
+    }
+
+    .project-card .tech-stack span {
+      padding: 3px 10px;
+      border-radius: 6px;
+      font-size: 12px;
+      background: rgba(255,255,255,0.06);
+      color: var(--text-muted);
+    }
+
+    .project-card .card-links {
+      display: flex;
+      gap: 12px;
+    }
+
+    .project-card .card-links a {
+      flex: 1;
+      text-align: center;
+      padding: 10px 16px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 500;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+
+    .project-card .card-links .btn-primary {
+      background: var(--primary);
+      color: white;
+    }
+
+    .project-card .card-links .btn-primary:hover {
+      background: var(--primary-dark);
+      box-shadow: 0 4px 16px rgba(99,102,241,0.4);
+    }
+
+    .project-card .card-links .btn-secondary {
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+    }
+
+    .project-card .card-links .btn-secondary:hover {
+      border-color: var(--text-muted);
+      color: var(--text);
+    }
+
+    /* ===== 页脚 ===== */
+    footer {
+      text-align: center;
+      padding: 40px 24px;
+      border-top: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+
+    footer a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    footer a:hover { text-decoration: underline; }
+
+    /* ===== 入场动画 ===== */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .hero, .skills-section, .projects-section {
+      animation: fadeUp 0.6s ease-out forwards;
+    }
+
+    .skills-section { animation-delay: 0.15s; opacity: 0; }
+    .projects-section { animation-delay: 0.3s; opacity: 0; }
+
+    /* ===== 响应式 ===== */
+    @media (max-width: 640px) {
+      .hero { padding-top: 120px; }
+      .hero h1 { font-size: 32px; }
+      .hero p { font-size: 16px; }
+      nav { padding: 12px 16px; }
+      nav .nav-links { display: none; }
+      .projects-grid { grid-template-columns: 1fr; }
+    }
+  </style>
 </head>
 <body>
-  <p>正在跳转...</p>
+
+  <!-- 背景光晕 -->
+  <div class="bg-glow"></div>
+
+  <!-- 导航栏 -->
+  <nav>
+    <div class="logo">Portfolio</div>
+    <div class="nav-links">
+      <a href="#about">关于</a>
+      <a href="#projects">项目</a>
+      <a href="mailto:your@email.com">联系</a>
+    </div>
+  </nav>
+
+  <!-- Hero 区域 -->
+  <section class="hero" id="about">
+    <div class="avatar">Z</div>
+    <h1>你好，我是<span class="highlight">你的名字</span></h1>
+    <p>前端开发工程师 / 热爱编程与创造 / 专注用户体验与代码质量</p>
+    <div class="social-links">
+      <a href="https://github.com/124zbt" target="_blank">🐙 GitHub</a>
+      <a href="mailto:your@email.com">✉️ Email</a>
+      <a href="#" target="_blank">💼 LinkedIn</a>
+      <a href="#" target="_blank">📄 下载简历</a>
+    </div>
+  </section>
+
+  <!-- 技能标签 -->
+  <section class="skills-section">
+    <h3>技术栈</h3>
+    <div class="skill-tags">
+      <span>HTML5</span>
+      <span>CSS3</span>
+      <span>JavaScript</span>
+      <span>Vue.js</span>
+      <span>React</span>
+      <span>Node.js</span>
+      <span>Git</span>
+      <span>Webpack</span>
+      <span>TypeScript</span>
+    </div>
+  </section>
+
+  <!-- 项目展示 -->
+  <section class="projects-section" id="projects">
+    <div class="section-header">
+      <h2>精选项目</h2>
+      <p>以下是我在学习和实践中完成的部分项目</p>
+    </div>
+
+    <div class="projects-grid">
+
+      <!-- 项目卡片 1：空调遥控器 -->
+      <div class="project-card">
+        <div class="card-icon">❄️</div>
+        <h3>智能空调遥控器</h3>
+        <p>模拟真实空调遥控器的 Web 应用，支持温度调节、模式切换、定时等功能，界面还原度高。</p>
+        <div class="tech-stack">
+          <span>HTML</span>
+          <span>CSS</span>
+          <span>JavaScript</span>
+        </div>
+        <div class="card-links">
+          <a href="kongtiao.html" class="btn-primary">在线体验 →</a>
+          <a href="https://github.com/124zbt/ac-panel" class="btn-secondary">源码</a>
+        </div>
+      </div>
+
+      <!-- 项目卡片 2：模板（复制这个 div 来添加新项目） -->
+      <!--
+      <div class="project-card">
+        <div class="card-icon">📝</div>
+        <h3>项目标题</h3>
+        <p>项目描述：用了什么技术、实现了什么功能、有什么亮点。</p>
+        <div class="tech-stack">
+          <span>技术1</span>
+          <span>技术2</span>
+        </div>
+        <div class="card-links">
+          <a href="project-page.html" class="btn-primary">在线体验 →</a>
+          <a href="https://github.com/你的仓库地址" class="btn-secondary">源码</a>
+        </div>
+      </div>
+      -->
+
+      <!-- 占位卡片：引导添加更多项目 -->
+      <div class="project-card" style="border-style: dashed; opacity: 0.6;">
+        <div class="card-icon" style="background: rgba(255,255,255,0.05);">➕</div>
+        <h3>更多项目筹备中</h3>
+        <p>持续学习，不断积累。下一个项目正在路上...</p>
+        <div class="tech-stack">
+          <span>Coming Soon</span>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- 页脚 -->
+  <footer>
+    <p>© 2026 你的名字 · 用 ❤️ 和 HTML 构建</p>
+    <p>本网站托管于 <a href="https://pages.github.com/" target="_blank">GitHub Pages</a></p>
+  </footer>
+
 </body>
 </html>
